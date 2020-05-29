@@ -5,10 +5,10 @@ with open("./guildmanager/__init__.py") as rfile:
     lines = rfile.readlines()
     for line in lines:
         if line.startswith("__version__ = "):
-            ver = line.split(" ")[-1]
+            ver = line.split(" ")[-1].replace('"', '')
             break
     else:
-        ver = "0.1a"
+        ver = "0.1"
 
 if ver.endswith(('a', 'b', 'rc')):
     # append version identifier based on commit count
@@ -28,7 +28,7 @@ if ver.endswith(('a', 'b', 'rc')):
         pass
 
 setup(
-    name='guildmanager_v2',
+    name='guildmanager-v2',
     version=ver,
     packages=['guildmanager'],
     url='https://github.com/dragdev-studios/guildmanager_v2',
