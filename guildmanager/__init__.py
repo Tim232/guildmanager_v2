@@ -97,7 +97,7 @@ class GuildManager(commands.Cog):
                   f"**Users:** {len(self.bot.users)}\n"
                   f"**Emojis:** {len(set(self.bot.emojis))}\n"
                   f"**Cached Messages:** {len(self.bot.cached_messages)}\n"
-                  f"**Average Ping:** `{self.average_latency}ms`\n"
+                  f"**Average Ping:** `{round(self.average_latency, 3)}ms`\n"
                   f"\n"
                   f"**Loaded Cogs:** {len(self.bot.cogs)}\n"
                   f"**Loaded Extensions:** {len(self.bot.extensions)}\n"
