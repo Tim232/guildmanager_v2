@@ -1,10 +1,14 @@
 import json
 import logging
+import argparse
 
 import discord
 from discord.ext import commands, tasks
 from datetime import datetime
 from jishaku.paginators import PaginatorEmbedInterface
+from humanize import naturaltime as nt, intcomma as ic
+
+from .helpers import get_git_commit, Guild
 
 _DEFAULTS = {}
 _PERMS = {
@@ -18,6 +22,9 @@ _PERMS = {
 }
 
 __version__ = "0.0.3a"
+__git_ver__ = get_git_commit()
+
+parser = argparse.ArgumentParser()
 
 
 class GuildManager(commands.Cog):
@@ -106,6 +113,9 @@ class GuildManager(commands.Cog):
                   f"**Total group commands:** {group_commands}\n"
                   f"**Total sub commands:** {sum([1 for n in self.bot.walk_commands() if n.parent])}"
         )
+        e.add_field(name="Cog Info", value=f"**Loaded:** {nt(self.loaded)}\n"
+                                           f"**Sampled Pings:** {ic(self.sampled_pings)}\n"
+                                           f"**Version:** {__version__}")
         paginator = PaginatorEmbedInterface(
             self.bot,
             commands.Paginator(
@@ -115,8 +125,64 @@ class GuildManager(commands.Cog):
             embed=e
         )
         for n, guild in enumerate(self.bot.guilds):
-            await paginator.add_line(f"{n}. {guild} (`{guild.id}`): {guild.member_count}")
+            await paginator.add_line(f"{ic(n)}. {guild} (`{guild.id}`): {guild.member_count}")
         await paginator.send_to(ctx.channel)
+
+    @gm_root.command(name="invite")
+    async def gm_invite(self, ctx: commands.Context, *, guild: Guild):
+        """Tries to get an invite from a guild.
+
+        Logic is as follows:
+            1. get invites
+            if that fails:
+            2. generate a temp invite
+            if that fails
+            3. cry"""
+        guild: discord.Guild
+        if "VANITY_URL" in guild.features:
+            i = await guild.vanity_invite()
+            return await ctx.send(f"Vanity Invite: <{i.url}>", delete_after=10)
+        if guild.me.guild_permissions.manage_guild:
+            m = await ctx.send("Attempting to find an invite.")
+            invites = await guild.invites()
+            for invite in invites:
+                if invite.max_age == 0:
+                    return await m.edit(content=f"Infinite Invite: {invite}")
+            else:
+                await m.edit(content="No Infinite Invites found - creating.")
+                for channel in guild.text_channels:
+                    try:
+                        invite = await channel.create_invite(max_age=60, max_uses=1, unique=True,
+                                                             reason=f"Invite requested"
+                                                                    f" by {ctx.author} via official management command. "
+                                                                    f"do not be alarmed, this is usually just"
+                                                                    f" to check something.")
+                        break
+                    except:
+                        continue
+                else:
+                    return await m.edit(content=f"Unable to create an invite - missing permissions.")
+                await m.edit(content=f"Temp invite: {invite.url} -> max age: 60s, max uses: 1")
+        else:
+            m = await ctx.send("Attempting to create an invite.")
+            for channel in guild.text_channels:
+                try:
+                    invite = await channel.create_invite(max_age=60, max_uses=1, unique=True, reason=f"Invite requested"
+                                                                                                     f" by {ctx.author} via official management command. do not be alarmed, this is usually just"
+                                                                                                     f" to check something.")
+                    break
+                except:
+                    continue
+            else:
+                return await m.edit(content=f"Unable to create an invite - missing permissions.")
+            await m.edit(content=f"Temp invite: {invite.url} -> max age: 60s, max uses: 1")
+
+    @gm_root.command(name="leave", aliases=['rem', 'remove'])
+    async def gm_leave(self, ctx: commands.Context, *, guild: Guild):
+        """Leaves a server."""
+        guild: discord.Guild
+        await guild.leave()
+        return await ctx.message.add_reaction("\N{white heavy check mark}")
 
 
 def setup(bot):
