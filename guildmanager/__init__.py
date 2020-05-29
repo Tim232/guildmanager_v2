@@ -17,6 +17,8 @@ _PERMS = {
     "use_external_emojis": True
 }
 
+__version__ = "0.0.1a"
+
 
 class GuildManager(commands.Cog):
     """
