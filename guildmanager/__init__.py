@@ -42,6 +42,8 @@ class GuildManager(commands.Cog):
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner()
 
+        return True
+
     @commands.command(name="guilds", aliases=['servers', 'gm', 'sm'])
     @commands.bot_has_permissions(**_PERMS)
     async def gm_root(self, ctx: commands.Context):

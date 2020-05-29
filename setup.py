@@ -34,6 +34,6 @@ setup(
     url='https://github.com/dragdev-studios/guildmanager_v2',
     license='Apache License 2.0',
     author='EEKIM10',
-    author_email='',
+    author_email='discordebotdev@gmail.com',
     description='Version 2 of guildmanager, with actual quality.'
 )
