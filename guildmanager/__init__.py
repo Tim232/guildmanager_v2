@@ -45,7 +45,7 @@ class GuildManager(commands.Cog):
                 json.dump(_DEFAULTS, wfile)
                 self.data = _DEFAULTS
         finally:
-            logging.log("[GUILDMANAGER] Cog Loaded.")
+            logging.info("[GUILDMANAGER] Cog Loaded.")
             self.sample_ping.start()
 
     def cog_unload(self):
