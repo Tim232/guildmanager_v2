@@ -74,7 +74,7 @@ class GuildManager(commands.Cog):
                 max_size=1990
             )
         )
-        for n, guild in self.bot.guilds:
+        for n, guild in enumerate(self.bot.guilds):
             await paginator.add_line(f"{n}. {guild} (`{guild.id}`): {guild.member_count}")
         await paginator.send_to(ctx.channel)
 
