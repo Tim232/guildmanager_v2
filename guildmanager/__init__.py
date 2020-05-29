@@ -72,7 +72,8 @@ class GuildManager(commands.Cog):
             commands.Paginator(
                 "", "",
                 max_size=1990
-            )
+            ),
+            embed=e
         )
         for n, guild in enumerate(self.bot.guilds):
             await paginator.add_line(f"{n}. {guild} (`{guild.id}`): {guild.member_count}")
