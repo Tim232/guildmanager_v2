@@ -48,7 +48,7 @@ class GuildManager(commands.Cog):
     @commands.bot_has_permissions(**_PERMS)
     async def gm_root(self, ctx: commands.Context):
         """Shows a nice list of your bot's servers."""
-        group_commands = sum([1 for n in self.bot.walk_commands() if isinstance(n, type(commands.group))])
+        group_commands = sum([1 for n in self.bot.walk_commands() if isinstance(n, commands.Group)])
 
         e = discord.Embed(
             title=f"You have: {len(self.bot.guilds)}."
