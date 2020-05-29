@@ -21,10 +21,10 @@ _PERMS = {
     "use_external_emojis": True
 }
 
-__version__ = "0.0.3a"
+__version__ = "0.0.4a"
 __git_ver__ = get_git_commit()
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()  # soonTM
 
 
 class GuildManager(commands.Cog):
