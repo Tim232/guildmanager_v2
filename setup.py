@@ -29,7 +29,7 @@ if ver.endswith(('a', 'b', 'rc')):
 
 setup(
     name='guildmanager-v2',
-    version=ver,
+    version="0.0.2",
     packages=['guildmanager'],
     url='https://github.com/dragdev-studios/guildmanager_v2',
     license='Apache License 2.0',
