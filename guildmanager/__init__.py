@@ -88,7 +88,7 @@ class GuildManager(commands.Cog):
         self.average_latency += latency
         self.average_latency /= self.pings
 
-    @commands.command(name="guilds", aliases=['servers', 'gm', 'sm'])
+    @commands.group(name="guilds", aliases=['servers', 'gm', 'sm'], invoke_without_command=True)
     @commands.bot_has_permissions(**_PERMS)
     async def gm_root(self, ctx: commands.Context):
         """Shows a nice list of your bot's servers."""
