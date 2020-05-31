@@ -23,7 +23,7 @@ with open('README.md') as f:
 
 setup(
     name='guildmanager-v2',
-    version=version,
+    version="0.0.4",  # version,
     packages=['guildmanager'],
     url='https://github.com/dragdev-studios/guildmanager_v2',
     license='Apache License 2.0',
