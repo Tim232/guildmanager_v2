@@ -1,6 +1,7 @@
 import json
 import logging
 import argparse
+from typing import Union
 
 import discord
 from discord.ext import commands, tasks
@@ -183,6 +184,23 @@ class GuildManager(commands.Cog):
         guild: discord.Guild
         await guild.leave()
         return await ctx.message.add_reaction("\N{white heavy check mark}")
+
+    @gm_root.command(name="mutual", aliases=['in'])
+    async def gm_mutual(self, ctx: commands.Context, *, user: Union[discord.Member, discord.User, int]):
+        """Tells you how many mutual guilds the bot has with another user."""
+        if isinstance(user, int): return await ctx.send("User not found.")
+        paginator = commands.Paginator("```md")
+        n = 1
+        for n, guild in enumerate(self.bot.guilds, start=1):
+            if user in guild.members:
+                paginator.add_line(f"{n}. {guild.name}")
+        if len(paginator.pages) == 0:
+            return await ctx.send(f"`0` mutual guilds.")
+        else:
+            await ctx.send(f"`{n}` mutual guilds:\n{paginator.pages[0]}")
+            if len(paginator.pages) >= 2:
+                for page in paginator.pages[1:]:
+                    await ctx.send(page)
 
 
 def setup(bot):
