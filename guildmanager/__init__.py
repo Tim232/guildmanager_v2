@@ -1,12 +1,18 @@
 import json
 import logging
 import argparse
+<<<<<<< HEAD
+import psutil
 from typing import Union
+=======
+>>>>>>> parent of fc0ed73... Add the guilds mutual command
 
 import discord
+import typing
 from discord.ext import commands, tasks
 from datetime import datetime
 from jishaku.paginators import PaginatorEmbedInterface
+from jishaku.shell import ShellReader
 from humanize import naturaltime as nt, intcomma as ic
 
 from .helpers import get_git_commit, Guild
@@ -26,6 +32,13 @@ __version__ = "0.0.4a"
 __git_ver__ = get_git_commit()
 
 parser = argparse.ArgumentParser()  # soonTM
+
+def percent(part: float, whole: float = 100.0, *, r: int = 0) -> float:
+    """Calculates percentages. Now't special."""
+    if part == 0 or whole == 0:
+        part += 0.00000000001
+        whole += 0.00000000001
+    return round((part / whole) * 100, r)
 
 
 class GuildManager(commands.Cog):
@@ -96,7 +109,7 @@ class GuildManager(commands.Cog):
         group_commands = sum([1 for n in self.bot.walk_commands() if isinstance(n, commands.Group)])
 
         e = discord.Embed(
-            title=f"You have: {len(self.bot.guilds)}."
+            title=f"You have: {len(self.bot.guilds)} guilds."
         )
         e.add_field(
             name="All Statistics:",
@@ -201,6 +214,53 @@ class GuildManager(commands.Cog):
             if len(paginator.pages) >= 2:
                 for page in paginator.pages[1:]:
                     await ctx.send(page)
+
+    @gm_root.command(name="update")
+    async def update(self, ctx, *, version: str = None):
+        """Updates the module to the latest (or provided) version."""
+        proc = psutil.Process()
+        with proc.oneshot():
+            command = proc.name()
+            if not command.lower().startswith("py"):
+                return await ctx.send(f"Unable to automatically update: process name does not start with `py`,"
+                                      f" so unable to invoke pip.")
+            else:
+                run = command.lower() + " -m pip install guildmanager-v2" + (" --upgrade" if not version else f"=={version}")
+
+        paginator = PaginatorEmbedInterface(self.bot, commands.Paginator("```bash", "```", 1600))
+        async with ctx.channel.typing():
+            with ShellReader(run, 120) as reader:
+                async for line in reader:
+                    if paginator.closed:
+                        return
+                    else:
+                        await paginator.add_line(line)
+                await paginator.add_line(f"[status] return code {reader.close_code}")
+        return await paginator.send_to(ctx.channel)
+
+    @gm_root.command(name="search", aliases=['find', 'query'])
+    async def gm_find(self, ctx: commands.Context, *, q: typing.Union[discord.User, int, str]):
+        """Iterates through bot.guilds, and if `q` is equal to owner, ID, or name, matches.
+
+        For a more in-depth version of this, like checking channel/role names, etc, use `[p]guilds get`."""
+        if isinstance(q, discord.User):
+            matches = []
+            for guild in self.bot.guilds:
+                if guild.owner == q:
+                    matches.append(guild)
+                    continue
+            if len(matches) == 0:
+                return await ctx.send(f"No matches.")
+            else:
+                pc = percent(len(matches), len(self.bot.guilds), r=2)
+                paginator = commands.Paginator("```md", max_size=1800)
+                for n, match in enumerate(matches, start=1):
+                    paginator.add_line(f"{n}. {match.name} ({match.id})")
+
+                first_page = f"{q.mention} owns {pc}% of the bot's servers:\n{paginator.pages[0]}"
+                await ctx.send(first_page)
+                if len(paginator.pages) > 1:
+                    for page in paginator.pages: await ctx.send(page)
 
 
 def setup(bot):
