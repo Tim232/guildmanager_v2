@@ -1,11 +1,8 @@
 import json
 import logging
 import argparse
-<<<<<<< HEAD
 import psutil
 from typing import Union
-=======
->>>>>>> parent of fc0ed73... Add the guilds mutual command
 
 import discord
 import typing
@@ -258,6 +255,42 @@ class GuildManager(commands.Cog):
                     paginator.add_line(f"{n}. {match.name} ({match.id})")
 
                 first_page = f"{q.mention} owns {pc}% of the bot's servers:\n{paginator.pages[0]}"
+                await ctx.send(first_page)
+                if len(paginator.pages) > 1:
+                    for page in paginator.pages: await ctx.send(page)
+        elif isinstance(q, int):
+            matches = []
+            for guild in self.bot.guilds:
+                if guild.owner.id == q or guild.id == q:
+                    matches.append(guild)
+                    continue
+            if len(matches) == 0:
+                return await ctx.send(f"No matches.")
+            else:
+                pc = percent(len(matches), len(self.bot.guilds), r=2)
+                paginator = commands.Paginator("```md", max_size=1800)
+                for n, match in enumerate(matches, start=1):
+                    paginator.add_line(f"{n}. {match.name} ({match.id})")
+
+                first_page = paginator.pages[0]
+                await ctx.send(first_page)
+                if len(paginator.pages) > 1:
+                    for page in paginator.pages: await ctx.send(page)
+        else:
+            matches = []
+            for guild in self.bot.guilds:
+                if guild.name.lower() in q.lower() or q.lower() in guild.name.lower():
+                    matches.append(guild)
+                    continue
+            if len(matches) == 0:
+                return await ctx.send(f"No matches.")
+            else:
+                pc = percent(len(matches), len(self.bot.guilds), r=2)
+                paginator = commands.Paginator("```md", max_size=1800)
+                for n, match in enumerate(matches, start=1):
+                    paginator.add_line(f"{n}. {match.name} ({match.id})")
+
+                first_page = paginator.pages[0]
                 await ctx.send(first_page)
                 if len(paginator.pages) > 1:
                     for page in paginator.pages: await ctx.send(page)
