@@ -131,7 +131,7 @@ class GuildManager(commands.Cog):
         owners = [x.owner for x in self.bot.guilds]
         v = ""
         sorted_ = sorted(owners, key=lambda x: percent(owners.count(x), len(owners)), reverse=True)
-        for n, user in enumerate(set(sorted_)[:10], start=1):
+        for n, user in enumerate(list(sorted_)[:10], start=1):
             v += f"{n}. {user} ({percent(owners.count(user), len(owners))}%)\n"
         e.add_field(name="Guild owners, sorted by number of servers they own that uses the bot:", value=v)
 
