@@ -6,6 +6,7 @@ from typing import Union
 
 import discord
 import typing
+import io
 from discord.ext import commands, tasks
 from datetime import datetime
 from jishaku.paginators import PaginatorEmbedInterface
@@ -13,6 +14,7 @@ from jishaku.shell import ShellReader
 from humanize import naturaltime as nt, intcomma as ic
 
 from .helpers import get_git_commit, Guild
+from matplotlib import pyplot as plt
 
 _DEFAULTS = {}
 _PERMS = {
@@ -302,6 +304,30 @@ class GuildManager(commands.Cog):
                 await ctx.send(first_page)
                 if len(paginator.pages) > 1:
                     for page in paginator.pages: await ctx.send(page)
+
+    @gm_root.command(name="growth", aliases=['graph'])
+    async def gm_growth(self, ctx: commands.Context):
+        """Shows your growth statistics, in a neat little graph!"""
+        plt.clf()
+        guilds = [
+            guild.me.joined_at for guild in self.bot.guilds
+        ]
+        guilds.sort(key=lambda g: g)
+        plt.grid(True)
+        fig, ax = plt.subplots()
+
+        ax.plot(guilds, tuple(range(len(guilds))), lw=2)
+
+        fig.autofmt_xdate()
+
+        plt.xlabel('Date')
+        plt.ylabel('Guilds')
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+        e = discord.Embed(color=discord.Color.orange())
+        e.set_image(url="attachment://attachment.png")
+        return await ctx.send(embed=e, file=discord.File(buf, "attachment.png"))
 
 
 def setup(bot):
