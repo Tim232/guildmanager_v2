@@ -1,20 +1,20 @@
+import argparse
+import io
 import json
 import logging
-import argparse
-import psutil
+import typing
+from datetime import datetime
 from typing import Union
 
 import discord
-import typing
-import io
+import psutil
 from discord.ext import commands, tasks
-from datetime import datetime
+from humanize import naturaltime as nt, intcomma as ic
 from jishaku.paginators import PaginatorEmbedInterface
 from jishaku.shell import ShellReader
-from humanize import naturaltime as nt, intcomma as ic
+from matplotlib import pyplot as plt
 
 from .helpers import get_git_commit, Guild
-from matplotlib import pyplot as plt
 
 _DEFAULTS = {}
 _PERMS = {
@@ -132,7 +132,7 @@ class GuildManager(commands.Cog):
 
         owners = [x.owner for x in self.bot.guilds]
         v = ""
-        sorted_ = sorted(owners, key=lambda x: percent(owners.count(x), len(owners)), reverse=True)
+        sorted_ = sorted(set(owners), key=lambda x: percent(owners.count(x), len(owners)), reverse=True)
         for n, user in enumerate(list(sorted_)[:10], start=1):
             v += f"{n}. {user} ({percent(owners.count(user), len(owners))}%)\n"
         e.add_field(name="Guild owners, sorted by number of servers they own that uses the bot:", value=v)
