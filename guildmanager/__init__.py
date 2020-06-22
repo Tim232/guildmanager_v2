@@ -16,7 +16,9 @@ from matplotlib import pyplot as plt
 
 from .helpers import get_git_commit, Guild
 
-_DEFAULTS = {}
+_DEFAULTS = {
+    "banned": []
+}
 _PERMS = {
     "read_messages": True,
     "send_messages": True,
@@ -69,6 +71,8 @@ class GuildManager(commands.Cog):
             self.sample_ping.start()
 
     def cog_unload(self):
+        with open("./gman.data", "w") as wfile:
+            json.dump(self.data, wfile)
         logging.info(f"[GUILDMANAGER] Cog unloaded.")
         self.sample_ping.stop()
 
