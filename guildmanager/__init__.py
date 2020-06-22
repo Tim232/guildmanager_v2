@@ -108,9 +108,9 @@ class GuildManager(commands.Cog):
         **Do NOT overwrite this!**
         """
         self.pings += 1
-        latency = self.bot.latency / 1000  # convert to ms
-        self.average_latency += latency
-        self.average_latency /= self.pings
+        latency = self.bot.latency * 1000
+        latency = latency / self.pings
+        self.average_latency = latency
 
     @commands.group(name="guilds", aliases=['servers', 'gm', 'sm'], invoke_without_command=True)
     @commands.bot_has_permissions(**_PERMS)
@@ -222,9 +222,11 @@ class GuildManager(commands.Cog):
         if isinstance(user, int): return await ctx.send("User not found.")
         paginator = commands.Paginator("```md")
         n = 1
+        r = 0
         for n, guild in enumerate(self.bot.guilds, start=1):
             if user in guild.members:
                 paginator.add_line(f"{n}. {guild.name}")
+                r += 1
         if len(paginator.pages) == 0:
             return await ctx.send(f"`0` mutual guilds.")
         else:
