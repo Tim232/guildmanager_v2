@@ -82,6 +82,13 @@ class GuildManager(commands.Cog):
 
         return True
 
+    async def bot_check(self, ctx):
+        if ctx.guild:
+            if ctx.guild.id in self.data.get("banned", []):
+                raise commands.CheckFailure("This server is prohibited from using this bot. Please contact the owner"
+                                            " to have this lifted.")
+        return True
+
     @property
     def ping(self) -> float:
         """Returns the bot's average latency (heartbeat/api connection latency), in ms.
@@ -332,6 +339,35 @@ class GuildManager(commands.Cog):
         e = discord.Embed(color=discord.Color.orange())
         e.set_image(url="attachment://attachment.png")
         return await ctx.send(embed=e, file=discord.File(buf, "attachment.png"))
+
+    @gm_root.command(name="ban")
+    async def ban(self, ctx: commands.Context, leave_too: typing.Optional[bool] = False, *, guild: Guild):
+        """Bans a server from using the bot
+
+        if `leave_too` is True, this will leave the server after banning it.
+        If it is not, the bot will just not respond to any commands in that server (but will raise checkfailures)."""
+        # prevent a softlock with no obvious fix to people with less than 1 braincell
+        owner_in = list(
+            filter(lambda g: ctx.author in g.members and g.id not in self.data.get('banned', []) and g.id != guild.id,
+                   self.bot.guilds))
+        if len(owner_in) <= 0:
+            return await ctx.send(f"Unable to ban as this would softlock the bot.")
+        else:
+            if not self.data.get("banned"):
+                self.data["banned"] = [guild.id]
+            else:
+                self.data["banned"].append(guild.id)
+            return await ctx.send(f"\N{white heavy check mark} banned the server {guild.id}.")
+
+    @gm_root.command(name="unban")
+    async def gm_unbn(self, ctx: commands.Context, *, guild: typing.Union[Guild, int]):
+        """Unbans a server. See: [p]help guilds ban"""
+        if isinstance(guild, discord.Guild): guild = guild.id
+        if not self.data.get("banned"):
+            self.data["banned"] = []
+        else:
+            self.data["banned"].remove(guild)
+        return await ctx.send(f"\N{white heavy check mark} unbanned the server {guild}.")
 
 
 def setup(bot):
